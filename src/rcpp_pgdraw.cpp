@@ -86,7 +86,7 @@ NumericVector rcpp_pgdraw(NumericVector b, NumericVector c)
 double samplepg(double z)
 {
   //  PG(b, z) = 0.25 * J*(b, z/2)
-  z = fabs(z) * 0.5;
+  z = (double)std::fabs((double)z) * 0.5;
   
   // Point on the intersection IL = [0, 4/ log 3] and IR = [(log 3)/pi^2, \infty)
   double t = MATH_2_PI;
@@ -94,14 +94,14 @@ double samplepg(double z)
   // Compute p, q and the ratio q / (q + p)
   // (derived from scratch; derivation is not in the original paper)
   double K = z*z/2.0 + MATH_PI2/8.0;
-  double logA = log(4) - MATH_LOG_PI - z;
-  double logK = log(K);
+  double logA = (double)std::log(4.0) - MATH_LOG_PI - z;
+  double logK = (double)std::log(K);
   double Kt = K * t;
-  double w = sqrt(MATH_PI_2);
+  double w = (double)std::sqrt(MATH_PI_2);
 
   double logf1 = logA + R::pnorm(w*(t*z - 1),0.0,1.0,1,1) + logK + Kt;
   double logf2 = logA + 2*z + R::pnorm(-w*(t*z+1),0.0,1.0,1,1) + logK + Kt;
-  double p_over_q = exp(logf1) + exp(logf2);
+  double p_over_q = (double)std::exp(logf1) + (double)std::exp(logf2);
   double ratio = 1.0 / (1.0 + p_over_q); 
 
   double u, X;
@@ -153,7 +153,7 @@ double samplepg(double z)
 // Generate exponential distribution random variates
 double exprnd(double mu)
 {
-	return -mu * log(1.0 - R::runif(0.0,1.0));
+	return -mu * (double)std::log(1.0 - (double)R::runif(0.0,1.0));
 }
 
 // Function a_n(x) defined in equations (12) and (13) of
@@ -167,12 +167,12 @@ double aterm(int n, double x, double t)
 {
   double f = 0;
   if(x <= t) {
-    f = MATH_LOG_PI + log(n + 0.5) + 1.5*(MATH_LOG_2_PI-log(x)) - 2*(n + 0.5)*(n + 0.5)/x;
+    f = MATH_LOG_PI + (double)std::log(n + 0.5) + 1.5*(MATH_LOG_2_PI- (double)std::log(x)) - 2*(n + 0.5)*(n + 0.5)/x;
   }
   else {
-    f = MATH_LOG_PI + log(n + 0.5) - x * MATH_PI2_2 * (n + 0.5)*(n + 0.5);
+    f = MATH_LOG_PI + (double)std::log(n + 0.5) - x * MATH_PI2_2 * (n + 0.5)*(n + 0.5);
   }    
-  return exp(f);
+  return (double)exp(f);
 }
 
 // Generate inverse gaussian random variates
@@ -181,7 +181,7 @@ double randinvg(double mu)
   // sampling
   double u = R::rnorm(0.0,1.0);
   double V = u*u;
-  double out = mu + 0.5*mu * ( mu*V - sqrt(4*mu*V + mu*mu * V*V) );
+  double out = mu + 0.5*mu * ( mu*V - (double)std::sqrt(4.0*mu*V + mu*mu * V*V) );
   
   if(R::runif(0.0,1.0) > mu /(mu+out)) {    
     out = mu*mu / out; 
@@ -201,7 +201,7 @@ double truncgamma()
   while(!done)
   {
     X = exprnd(1.0) * 2.0 + c;
-    gX = MATH_SQRT_PI_2 / sqrt(X);
+    gX = MATH_SQRT_PI_2 / (double)std::sqrt(X);
     
     if(R::runif(0.0,1.0) <= gX) {
       done = true;
@@ -226,7 +226,7 @@ double tinvgauss(double z, double t)
 	  u = R::runif(0.0, 1.0);
       X = 1.0 / truncgamma();
       
-      if(log(u) < (-z*z*0.5*X)) {
+	  if ((double)std::log(u) < (-z*z*0.5*X)) {
         break;
       }
     }
